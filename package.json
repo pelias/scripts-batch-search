@@ -1,0 +1,38 @@
+{
+  "name": "pelias-batch-search",
+  "version": "1.0.0",
+  "description": "Simple csv batch geocoding utility",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node app.js test/input.csv test/actualOutput.csv test/queryParams.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pelias/scripts-batch-search.git"
+  },
+  "keywords": [
+    "batch",
+    "geocoding",
+    "search",
+    "address",
+    "location",
+    "geolocation"
+  ],
+  "author": "Mapzen <support@mapzen.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pelias/scripts-batch-search/issues"
+  },
+  "homepage": "https://github.com/pelias/scripts-batch-search",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "csv-stream": "^0.1.3",
+    "csv-write-stream": "^1.0.0",
+    "progress-stream": "^1.2.0",
+    "request": "^2.69.0",
+    "single-line-log": "^1.0.1",
+    "through2": "^2.0.0",
+    "through2-spy": "^2.0.0"
+  }
+}

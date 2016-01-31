@@ -1,0 +1,4 @@
+name,address,phone,res_longitude,res_latitude,res_confidence,res_label
+Accelerator NYC,"30 W 26th Street, New York, NY",123-456-7890,-80.133009,42.089312,0.5,"2643 W 26TH ST, Millcreek, PA"
+missing address,,098-765-4321,,,,ERROR: Bad Request
+"City Hall, Philly","1401 John F Kennedy Blvd, PA",345-234-1234,-75.164148,39.954013,0.907,"1401 John F Kennedy Boulevard, Philadelphia, PA"
