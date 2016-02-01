@@ -11,7 +11,7 @@ function search(params, progressCallback, endCallback) {
 
   var processedSize = 0;
 
-  setInterval(function () {
+  var progressInterval = setInterval(function () {
     progressCallback(processedSize);
   }, 1000*5);
 
@@ -24,7 +24,10 @@ function search(params, progressCallback, endCallback) {
     .pipe(csvStream.write())
     .pipe(fs.createWriteStream(params.outputFile));
 
-  stream.on('finish', endCallback);
+  stream.on('finish', function () {
+    clearInterval(progressInterval);
+    endCallback();
+  });
 }
 
 module.exports = search;

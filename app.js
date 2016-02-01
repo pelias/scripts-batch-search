@@ -17,6 +17,6 @@ search(
     log('Number of requests processed: '.green + progress);
   },
   function () {
-    console.log('All done!');
+    console.log('\nAll done!'.green);
   }
 );
