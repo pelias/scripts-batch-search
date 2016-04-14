@@ -6,7 +6,7 @@ function createReadStream() {
 
   var options = {
     delimiter: ',', // default is ,
-    endLine: '\n', // default is \n,
+    endLine: '\r', // default is \n,
     escapeChar: '"', // default is an empty string
     enclosedChar: '"' // default is an empty string
   };

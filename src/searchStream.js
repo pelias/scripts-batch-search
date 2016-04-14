@@ -12,15 +12,11 @@ function createSearchStream(queryParams) {
   var inFlightCount = 0;
 
   return through.obj(function (data, enc, next) {
-    if (!data.hasOwnProperty('address')) {
-      return next(new Error('no address column'));
-    }
-
     var self = this;
 
     inFlightCount++;
 
-    queryParams.text = data.address;
+    queryParams.text = [data.Address, data.City, data.State].join(', ');
 
     var reqOptions = {
       url: 'https://search.mapzen.com/v1/search',
@@ -78,6 +74,10 @@ function addResData(data, resData) {
   data.res_latitude = resData[0].geometry.coordinates[1];
   data.res_confidence = resData[0].properties.confidence;
   data.res_label = resData[0].properties.label;
+  data.res_housenumber = resData[0].properties.housenumber;
+  data.res_street = resData[0].properties.street;
+  data.res_region = resData[0].properties.region;
+  data.res_postalcode = resData[0].properties.postalcode;
   return data;
 }
 
