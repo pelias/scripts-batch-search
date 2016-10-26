@@ -17,7 +17,7 @@ For the time being, this geocoder only uses CSV files for input and output.
 2. Clone this repository and install the node module by entering this code into your command line:
 
 ```bash
-git clone git@github.com:pelias/scripts-batch-search.git
+git clone https://github.com/pelias/scripts-batch-search.git
 cd scripts-batch-search
 npm install
 ```
