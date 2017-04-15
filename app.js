@@ -13,8 +13,10 @@ params.queryParams = JSON.parse(fs.readFileSync(params.queryParams));
 
 search(
   params,
-  function (progress) {
-    log('Number of requests processed: '.green + progress);
+  function (updateType, progress, bbox) {
+    if (updateType === 'progress') {
+      log('Number of requests processed: '.green + progress);
+    }  
   },
   function () {
     console.log('\nAll done!'.green);
