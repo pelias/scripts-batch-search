@@ -4,6 +4,15 @@ var searchStream = require('./src/searchStream');
 var spy = require('through2-spy');
 
 
+/**
+ * @param {object} params
+ * @param {string} params.inputFile
+ * @param {string} params.outputFile
+ * @param {string} params.queryParams
+ * @param {array} params.columns
+ * @param {*} progressCallback 
+ * @param {*} endCallback 
+ */
 function search(params, progressCallback, endCallback) {
   if (!params.inputFile || !params.outputFile || !params.queryParams) {
     throw new Error('Invalid parameters! Please provide input file, output file, and Mapzen Search API key');
@@ -14,11 +23,11 @@ function search(params, progressCallback, endCallback) {
 
   var progressInterval = setInterval(function () {
     progressCallback('progress', processedSize, bbox);
-  }, 1000*5);
+  }, 500);
 
   var stream = fs.createReadStream(params.inputFile)
     .pipe(csvStream.read())
-    .pipe(searchStream(params.queryParams))
+    .pipe(searchStream(params.queryParams, params.columns))
     .pipe(spy.obj(function (data) {
       processedSize++;
       bbox.minLat = (data.res_latitude < bbox.minLat) ? data.res_latitude : bbox.minLat;

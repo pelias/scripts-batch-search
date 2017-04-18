@@ -3,24 +3,25 @@ var through = require('through2');
 var request = require('request');
 
 
-function createSearchStream(queryParams) {
+function createSearchStream(queryParams, columns) {
 
   if (!queryParams.hasOwnProperty('api_key')) {
     throw new Error('Query parameters must at least contain api_key');
   }
 
+  columns = columns || ['address'];
   var inFlightCount = 0;
 
   return through.obj(function (data, enc, next) {
-    if (!data.hasOwnProperty('address')) {
-      return next(new Error('no address column'));
-    }
+    if (!data.hasOwnProperty(columns[0])) {
+      return next(new Error('expected column not found'));
+    }    
 
     var self = this;
 
     inFlightCount++;
 
-    queryParams.text = data.address;
+    queryParams.text = data[columns[0]];
 
     var reqOptions = {
       url: 'https://search.mapzen.com/v1/search',
@@ -51,7 +52,7 @@ function createSearchStream(queryParams) {
     // respect the rate limit and don't push another request sooner than 6 seconds
     setTimeout(function () {
       next(null);
-    }, 1000 / 5);
+    }, 1000 / 10);
 
   },
   // don't flush the stream until the last in flight request has been handled
