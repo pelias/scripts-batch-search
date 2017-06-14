@@ -9,6 +9,7 @@ var spy = require('through2-spy');
  * @param {string} params.inputFile
  * @param {string} params.outputFile
  * @param {string} params.queryParams
+ * @param {string} params.endpoint
  * @param {array} params.columns
  * @param {*} progressCallback 
  * @param {*} endCallback 
@@ -27,14 +28,22 @@ function search(params, progressCallback, endCallback) {
 
   var stream = fs.createReadStream(params.inputFile)
     .pipe(csvStream.read())
-    .pipe(searchStream(params.queryParams, params.columns))
+    .pipe(searchStream(params.endpoint, params.queryParams, params.columns))
     .pipe(spy.obj(function (data) {
       processedSize++;
-      bbox.minLat = (data.res_latitude < bbox.minLat) ? data.res_latitude : bbox.minLat;
-      bbox.minLon = (data.res_longitude < bbox.minLon) ? data.res_longitude : bbox.minLon;
-      bbox.maxLat = (data.res_latitude > bbox.maxLat) ? data.res_latitude : bbox.maxLat;
-      bbox.maxLon = (data.res_longitude > bbox.maxLon) ? data.res_longitude : bbox.maxLon;
-      progressCallback('row', data, bbox);
+      if (data.res_label !== 'ERROR: 0 results') {
+        bbox.minLat = (data.res_latitude < bbox.minLat) ? data.res_latitude : bbox.minLat;
+        bbox.minLon = (data.res_longitude < bbox.minLon) ? data.res_longitude : bbox.minLon;
+        bbox.maxLat = (data.res_latitude > bbox.maxLat) ? data.res_latitude : bbox.maxLat;
+        bbox.maxLon = (data.res_longitude > bbox.maxLon) ? data.res_longitude : bbox.maxLon;
+      }
+      const keepGoing = progressCallback('row', data, bbox);
+      if (!keepGoing) {
+        console.log('stopping early');
+        stream.destroy();
+        clearInterval(progressInterval);
+        endCallback(true);
+      }
     }))
     .pipe(csvStream.write())
     .pipe(fs.createWriteStream(params.outputFile));

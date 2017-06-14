@@ -3,7 +3,7 @@ var through = require('through2');
 var request = require('request');
 
 
-function createSearchStream(queryParams, columns) {
+function createSearchStream(endpoint, queryParams, columns) {
 
   if (!queryParams.hasOwnProperty('api_key')) {
     throw new Error('Query parameters must at least contain api_key');
@@ -13,30 +13,38 @@ function createSearchStream(queryParams, columns) {
   var inFlightCount = 0;
 
   return through.obj(function (data, enc, next) {
-    if (!data.hasOwnProperty(columns[0])) {
-      return next(new Error('expected column not found'));
-    }    
+    // if (!data.hasOwnProperty(columns[0])) {
+    //   return next(new Error('expected column not found'));
+    // }    
 
     var self = this;
 
     inFlightCount++;
 
-    queryParams.text = data[columns[0]];
-
+    columns.forEach((column) => {
+      queryParams[column.mapping] = data[column.column];
+    });    
+    
     var reqOptions = {
-      url: 'https://search.mapzen.com/v1/search',
+      url: `https://search.mapzen.com/v1/${endpoint}`,
       method: 'GET',
       qs: queryParams
     };
 
+    //console.log(reqOptions);    
+    
     request(reqOptions, function (err, res, body) {
 
       if (err || res.statusCode !== 200) {
+        console.error(err || res.statusCode);
+
         self.push(addErrorData(data, (err ? err.message : res.statusMessage)));
         inFlightCount--;
         return;
       }
 
+      //console.log('got it', inFlightCount);
+      
       var resData = JSON.parse(body).features;
 
       if (resData.length === 0) {
@@ -71,6 +79,7 @@ function addErrorData(data, message) {
   data.res_latitude = '';
   data.res_confidence = '';
   data.res_label = 'ERROR: ' + message;
+  data.res_layer = '';  
   return data;
 }
 
@@ -79,6 +88,7 @@ function addResData(data, resData) {
   data.res_latitude = resData[0].geometry.coordinates[1];
   data.res_confidence = resData[0].properties.confidence;
   data.res_label = resData[0].properties.label;
+  data.res_layer = resData[0].properties.layer;  
   return data;
 }
 
