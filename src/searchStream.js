@@ -60,7 +60,7 @@ function createSearchStream(endpoint, queryParams, columns) {
     // respect the rate limit and don't push another request sooner than 6 seconds
     setTimeout(function () {
       next(null);
-    }, 1000 / 10);
+    }, 1000 / 6);
 
   },
   // don't flush the stream until the last in flight request has been handled
