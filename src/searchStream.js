@@ -2,8 +2,7 @@ var util = require('util');
 var through = require('through2');
 var request = require('request');
 
-
-function createSearchStream(endpoint, queryParams, columns) {
+function createSearchStream(baseUrl, endpoint, queryParams, qps, columns) {
 
   if (!queryParams.hasOwnProperty('api_key')) {
     throw new Error('Query parameters must at least contain api_key');
@@ -23,10 +22,10 @@ function createSearchStream(endpoint, queryParams, columns) {
 
     columns.forEach((column) => {
       queryParams[column.mapping] = data[column.column];
-    });    
-    
+    });
+
     var reqOptions = {
-      url: `https://search.mapzen.com/v1/${endpoint}`,
+      url: `${baseUrl}/${endpoint}`,
       method: 'GET',
       qs: queryParams
     };
@@ -60,7 +59,7 @@ function createSearchStream(endpoint, queryParams, columns) {
     // respect the rate limit and don't push another request sooner than 6 seconds
     setTimeout(function () {
       next(null);
-    }, 1000 / 6);
+    }, 1000 / qps);
 
   },
   // don't flush the stream until the last in flight request has been handled

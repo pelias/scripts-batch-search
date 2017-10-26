@@ -1,11 +1,13 @@
 var fs = require('fs');
 var csvStream = require('./src/csvStream');
-var searchStream = require('./src/searchStream');
+var createSearchStream = require('./src/searchStream');
 var spy = require('through2-spy');
 
 
 /**
  * @param {object} params
+ * @param {number} params.qps
+ * @param {string} params.baseUrl
  * @param {string} params.inputFile
  * @param {string} params.outputFile
  * @param {string} params.queryParams
@@ -27,10 +29,17 @@ function search(params, progressCallback, endCallback) {
     progressCallback('progress', processedSize, bbox);
   }, 500);
 
+  const searchStream = createSearchStream(
+    params.baseUrl || `https://search.mapzen.com/v1/`,
+    params.endpoint,
+    params.queryParams,
+    params.qps || 6,
+    params.columns
+  );
 
   var stream = fs.createReadStream(params.inputFile)
     .pipe(csvStream.read())
-    .pipe(searchStream(params.endpoint, params.queryParams, params.columns))
+    .pipe(searchStream)
     .pipe(spy.obj(function (data) {
       processedSize++;
       if (data.res_label.indexOf('ERROR:') !== 0) {
