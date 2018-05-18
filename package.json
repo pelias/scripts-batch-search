@@ -27,7 +27,7 @@
   "homepage": "https://github.com/pelias/scripts-batch-search",
   "dependencies": {
     "colors": "^1.1.2",
-    "csv-stream": "^0.1.3",
+    "csv-stream": "^0.2.0",
     "csv-write-stream": "^1.0.0",
     "progress-stream": "^1.2.0",
     "request": "^2.69.0",
