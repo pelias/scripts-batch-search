@@ -15,8 +15,8 @@ search(
   params,
   function (updateType, progress, bbox) {
     if (updateType === 'progress') {
-      log('Number of requests processed: '.green + progress);
-    }  
+      //log('Number of requests processed: '.green + progress);
+    }
   },
   function () {
     console.log('\nAll done!'.green);
