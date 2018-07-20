@@ -1,11 +1,13 @@
-var csvReader = require('csv-stream');
-var csvWriter = require('csv-write-stream');
+const csvReader = require('csv-stream');
+const csvWriter = require('csv-write-stream');
+
+const delimiter = process.env.DELIMITER || ',';
 
 
 function createReadStream() {
 
   var options = {
-    delimiter: ',', // default is ,
+    delimiter: delimiter,
     endLine: '\n', // default is \n,
     escapeChar: '"', // default is an empty string
     enclosedChar: '"' // default is an empty string
@@ -16,7 +18,7 @@ function createReadStream() {
 
 function createWriteStream() {
   // column headers will be defined by the keys of the first object
-  return csvWriter();
+  return csvWriter({ separator: delimiter });
 }
 
 module.exports = {
