@@ -12,7 +12,7 @@ This geocoder requires node.js and npm (which is included in node installs) to r
 For the time being, this geocoder only uses CSV files for input and output.
 
 ### Instructions
-Clone this repository and install the node module by entering this code into your command line:
+1. Clone this repository and install the node module by entering this code into your command line:
 
 ```bash
 git clone https://github.com/pelias/scripts-batch-search.git
@@ -20,11 +20,9 @@ cd scripts-batch-search
 npm install
 ```
 
-3. Open up your CSV file and make sure your input data is gonna work with our tool! Here’s a [test input](https://github.com/pelias/scripts-batch-search/blob/master/test/input.csv) sample that shows you how the address column should be organized. Notice that the complete address is in ONE column, including the city and state. You might need to concatenate your data columns before running this tool or it won’t work.
+2. Open up your CSV file and make sure your input data is gonna work with our tool! Here’s a [test input](https://github.com/pelias/scripts-batch-search/blob/master/test/input.csv) sample that shows you how the address column should be organized. Notice that the complete address is in ONE column, including the city and state. You might need to concatenate your data columns before running this tool or it won’t work.
 
-4. Create a blank file named output.CSV. This is where the geocoded output will go.
-
-5. Create a JSON file called ‘parameters.json’. This is the query parameters document that will include your API key (if using a hosted instance of Pelias) and other search parameters you might want to include. Here’s an example of parameters:
+3. Create a JSON file called `parameters.json`. This is the query parameters document that will include your API key (if using a hosted instance of Pelias) and other search parameters you might want to include. Here’s an example of parameters:
 
 ```javascript
 {
@@ -34,11 +32,11 @@ npm install
 }
 ```
 
-6. Configure the required, any any optional, environment variables:
+4. Configure the required, any any optional, environment variables:
 
 ```bash
-export URL="https://api.geocode.earth" # or your own Pelias installation
-export MAX_IN_FLIGHT=10 # or other integer, if you want things to go faster
+export URL="https://api.geocode.earth" # (REQIRED). URL to a hosted instance of Pelias or your own Pelias installation
+export MAX_IN_FLIGHT=10 # or other integer, if you want things to go faster (default is 1)
 export DELIMITER=',' # if you need to change the delimiter
 ```
 
@@ -46,7 +44,7 @@ export DELIMITER=',' # if you need to change the delimiter
 *Don't set the `text` parameter in the queryParams file, because that will be overwritten with each address in the
 input data file.*
 
-6. You're ready to run this script! Open up your command line tool and enter:
+5. You're ready to run this script! Open up your command line tool and enter:
 
 ```bash
 npm run start -- ./file/input.csv ./file/output.csv ./file/parameters.json
