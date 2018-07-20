@@ -1,10 +1,18 @@
 var util = require('util');
 var through = require('through2');
-var request = require('request');
-const https = require('http');
+var request = require('requestretry');
+const http = require('http');
+const https = require('https');
 
-const agent = new https.Agent({ keepAlive: true, maxSockets: 80});
+// Base url of service
+const url = process.env.URL + '/v1/search';
+// maximum number of HTTP requests in flight
+const max_in_flight = process.env.MAX_IN_FLIGHT || 1;
+// seconds in between printing of statistics
+const stat_delay = process.env.STAT_DELAY || 1;
 
+const httpLib = url.startsWith('https:') ? https : http;
+const agent = new httpLib.Agent({ keepAlive: true, maxSockets: max_in_flight});
 
 const start = new Date();
 const stats = {
@@ -13,55 +21,71 @@ const stats = {
   zero_results: 0,
   address: 0,
   venue: 0,
+  street: 0,
   admin: 0,
   inFlightCount: 0
 };
+let last_progress = 0;
 
 function createSearchStream(queryParams) {
-
-
-  if (!queryParams.hasOwnProperty('api_key')) {
-    throw new Error('Query parameters must at least contain api_key');
-  }
-
   const statInterval = setInterval(function() {
-    stats.RPS = stats.processed / ( new Date() - start) * 1000;
+    stats.RPS = (stats.processed - last_progress) / stat_delay;
     console.log(JSON.stringify(stats));
-  }, 1 * 1000);
+    last_progress = stats.processed;
+  }, stat_delay * 1000);
 
   return through.obj(function (data, enc, next) {
     if (!data.hasOwnProperty('address')) {
+      console.log(data);
       return next(new Error('no address column'));
     }
 
     var self = this;
-
     stats.inFlightCount++;
 
+    const this_query_params = { };
+    this_query_params.text = data.address;
+    if (queryParams.api_key) {
+      this_query_params.api_key = queryParams.api_key;
+    }
 
-    const this_query_params = {
-    };
-    this_query_params.text = data.name + ' ' + data.address;
+    if (!data.address || data.address.length === 0) {
+      next();
+    }
 
     var reqOptions = {
-      url: 'http://internal-a56c85a765acc11e8bebb0e73ead8d1c-196936346.us-east-1.elb.amazonaws.com:3100/v1/search',
+      url: url,
       method: 'GET',
+      maxAttempts: 10,
+      retryDelay: 5000,
+      timeout: 10000,
       qs: this_query_params,
       agent: agent
     };
+
+    if (this_query_params.text.length > 300) {
+      console.log("warning, text over 100 length");
+      console.log(this_query_params.text);
+    }
 
     request(reqOptions, function (err, res, body) {
       stats.processed++;
 
       if (err || res.statusCode !== 200) {
-        console.log(`${res.statusCode}: ${err ? err.message : res.statusMessage}`);
-
-        if (res.statusCode === 400) {
-          console.log(JSON.stringify(queryParams));
-          var resData = JSON.parse(body);
-          console.log(JSON.stringify(resData.geocoding.errors));
+        if (res) {
+          console.log(`${res.statusCode}: ${err ? err.message : res.statusMessage}`);
+          if (res.statusCode === 400) {
+            console.log(JSON.stringify(this_query_params));
+            var resData = JSON.parse(body);
+            console.log(JSON.stringify(resData.geocoding.errors));
+          }
+          self.push(addErrorData(data, (err ? err.message : res.statusMessage)));
+        } else {
+          console.log("encoutered error with no no res: " + err.message);
+          console.log("query params: " + JSON.stringify(this_query_params));
+          self.push(addErrorData(data, (err ? err.message : res.statusMessage)));
         }
-        self.push(addErrorData(data, (err ? err.message : res.statusMessage)));
+
         stats.error++;
         stats.inFlightCount--;
         return;
@@ -81,15 +105,16 @@ function createSearchStream(queryParams) {
     });
 
     // adaptively adjust how quickly we progress through the stream
+    // essentially this is a busy-wait before the call to next()
+    const delay_until_next_attempt_at_return = 1000 / max_in_flight * 2;
     const nextInterval = setInterval(function () {
-      if (stats.inFlightCount > 200) {
+      if (stats.inFlightCount > max_in_flight / 2) {
         return;
       } else {
         clearInterval(nextInterval)
         next(null);
       }
-    }, 10);
-
+    }, delay_until_next_attempt_at_return);
   },
   // don't flush the stream until the last in flight request has been handled
   function (done) {
@@ -116,12 +141,15 @@ function addResData(data, resData) {
   data.res_latitude = resData[0].geometry.coordinates[1];
   data.res_confidence = resData[0].properties.confidence;
   data.res_label = resData[0].properties.label;
+  data.res_layer = resData[0].properties.layer;
 
   //stats
   if (resData[0].properties.layer == 'address') {
     stats.address++;
   } else if (resData[0].properties.layer == 'venue') {
     stats.venue++;
+  } else if (resData[0].properties.layer == 'street') {
+    stats.street++;
   } else {
     stats.admin++;
   }
