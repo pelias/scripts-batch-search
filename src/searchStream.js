@@ -5,7 +5,8 @@ const http = require('http');
 const https = require('https');
 
 // Base url of service
-const url = process.env.URL + '/v1/search';
+const host = process.env.URL || 'https://api.geocode.earth';
+const url = host + '/v1/search';
 // maximum number of HTTP requests in flight
 const max_in_flight = process.env.MAX_IN_FLIGHT || 1;
 // seconds in between printing of statistics

@@ -32,12 +32,12 @@ npm install
 }
 ```
 
-4. Configure the required, any any optional, environment variables:
+4. Configure optional environment variables:
 
 ```bash
-export URL="https://api.geocode.earth" # (REQIRED). URL to a hosted instance of Pelias or your own Pelias installation
-export MAX_IN_FLIGHT=10 # or other integer, if you want things to go faster (default is 1)
-export DELIMITER=',' # if you need to change the delimiter
+export URL="https://api.geocode.earth" # URL to a hosted instance of Pelias or your own Pelias installation
+export MAX_IN_FLIGHT=3 # or other integer, if you want things to go faster (default is 1)
+export DELIMITER=',' # if you need to change the delimiter used in the input CSV
 ```
 
 
@@ -47,7 +47,7 @@ input data file.*
 5. You're ready to run this script! Open up your command line tool and enter:
 
 ```bash
-npm run start -- ./file/input.csv ./file/output.csv ./file/parameters.json
+npm start -- ./file/input.csv ./file/output.csv ./file/parameters.json
 ```
 
 Once running, the script will update to let you know its progress through the file. Once finished, you should see your output CSV file contain all the data from the input CSV, plus additional columns representing the results. All results columns will be prefixed with res\_ to avoid conflicts. You can see an example of expected output [here](test/expectedOutput.csv)
