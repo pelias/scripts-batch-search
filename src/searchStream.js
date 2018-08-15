@@ -12,6 +12,9 @@ const max_in_flight = process.env.MAX_IN_FLIGHT || 1;
 // seconds in between printing of statistics
 const stat_delay = process.env.STAT_DELAY || 1;
 
+const non_fallback_layers = ['venue', 'address'];
+const non_admin_layers = ['venue', 'address', 'street'];
+
 const httpLib = url.startsWith('https:') ? https : http;
 const agent = new httpLib.Agent({ keepAlive: true, maxSockets: max_in_flight});
 
@@ -145,12 +148,10 @@ function addResData(data, resData) {
   data.res_layer = resData[0].properties.layer;
 
   //stats
-  if (resData[0].properties.layer == 'address') {
-    stats.address++;
-  } else if (resData[0].properties.layer == 'venue') {
-    stats.venue++;
-  } else if (resData[0].properties.layer == 'street') {
-    stats.street++;
+  const layer = resData[0].properties.layer;
+
+  if (non_admin_layers.includes(layer)) {
+    stats[layer]++;
   } else {
     stats.admin++;
   }
