@@ -1,6 +1,6 @@
 var fs = require('fs');
 var csvStream = require('./src/csvStream');
-var searchStream = require('./src/searchStream');
+var searchStream = require('./src/reverseStream');
 var spy = require('through2-spy');
 
 
