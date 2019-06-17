@@ -13,7 +13,7 @@ const max_in_flight = process.env.MAX_IN_FLIGHT || 1;
 const stat_delay = process.env.STAT_DELAY || 1;
 
 const non_fallback_layers = ['venue', 'address'];
-const non_admin_layers = ['venue', 'address', 'street'];
+const non_admin_layers = ['venue', 'address', 'street', 'postalcode'];
 
 const httpLib = url.startsWith('https:') ? https : http;
 const agent = new httpLib.Agent({ keepAlive: true, maxSockets: max_in_flight});
@@ -27,6 +27,7 @@ const stats = {
   venue: 0,
   street: 0,
   admin: 0,
+  postalcode: 0,
   inFlightCount: 0
 };
 let last_progress = 0;
