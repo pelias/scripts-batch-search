@@ -40,7 +40,7 @@ function createSearchStream(queryParams) {
   }, stat_delay * 1000);
 
   return through.obj(function (data, enc, next) {
-    if (!data.hasOwnProperty('address')) {
+    if (!data.hasOwnProperty('address') || data.address.length === 0) {
       console.log(data);
       return next(new Error('no address column'));
     }
@@ -52,10 +52,6 @@ function createSearchStream(queryParams) {
     this_query_params.text = data.address;
     if (queryParams.api_key) {
       this_query_params.api_key = queryParams.api_key;
-    }
-
-    if (!data.address || data.address.length === 0) {
-      next();
     }
 
     var reqOptions = {
