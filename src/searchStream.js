@@ -137,6 +137,7 @@ function addErrorData(data, message) {
   data.res_latitude = '';
   data.res_confidence = '';
   data.res_label = 'ERROR: ' + message;
+  data.res_layer = '';
   return data;
 }
 
